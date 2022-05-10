@@ -1,0 +1,213 @@
+/* Thanks to: https://github.com/lucagez/medium.css */
+
+@import url('https://fonts.googleapis.com/css?family=Lato:400,700|Lora|Playfair+Display:700i,900');
+
+html, body {
+  margin: 0;
+  width: 100%;
+}
+
+h1, h2, p, figcaption, a, li, dt, dd {
+  color: rgba(0, 0, 0, 0.84);
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  font-family: "Lato", sans-serif;
+  text-align: left;
+}
+
+h1 {
+  font-size: 2.7em;
+  margin: 0.6em 0 0.28em;
+  font-weight: normal;
+}
+
+h2 {
+  font-size: 1.9em;
+  font-weight: 700;
+  padding: 0;
+  margin: 1.25em 0 2em;
+  line-height: 1.2em;
+  letter-spacing: 0;
+}
+
+article > h2 {
+  margin: 1.25em 0 0.28em;
+}
+
+p, figcaption, li, dt, dd, table {
+  margin-top: 1em;
+  font-family: "Lora", serif;
+  font-size: 1.3em;
+  letter-spacing: -0.03px;
+  line-height: 1.58em;
+}
+
+p, figcaption, li, dt, dd {
+  word-break: break-word;
+}
+
+li li, li p, td p, td li {
+  font-size: 1em;
+}
+
+ol, ul {
+  padding: 0;
+}
+
+li, dd {
+  margin-left: 30px;
+}
+
+dt {
+  font-weight: 700;
+}
+
+/* Thanks to: https://css-tricks.com/snippets/css/simple-and-nice-blockquote-styling/ */
+
+blockquote {
+  font-family: "Playfair Display", serif;
+  font-size: 1.7em;
+  font-style: italic;
+  letter-spacing: -0.36px;
+  overflow-wrap: break-word;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.68);
+  position: relative;
+  text-align: center;
+}
+
+blockquote p {
+  font-size: 1em;
+  line-height: 1.45em;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+figure {
+  margin: 2em 0;
+}
+
+/* Thanks to: https://codepen.io/mithicher/pen/opDgn */
+
+header {
+  background: rgba(43, 16, 54, .9);
+  margin-bottom: 2em;
+}
+
+.nav-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+article > p, article > ul, article > ol, article > dl {
+  max-width: 680px;
+}
+
+.nav-wrapper, article > p, article > figure, article > ul, article > ol, article > dl {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main {
+  margin: 0 2em 2.5em;
+}
+
+@media (min-width: 728px) {
+  main {
+    margin-left: 3em;
+    margin-right: 3em;
+  }
+}
+
+@media (min-width: 1080px) {
+  main {
+    margin-left: 4em;
+    margin-right: 4em;
+  }
+}
+
+header h1 {
+  font-size: 1.3em;
+  line-height: 1.55em;
+  letter-spacing: 0.2em;
+  margin: 0;
+  font-weight: bold;
+  padding: 0;
+}
+
+header h1 a {
+  display: block;
+  color: rgba(255, 255, 255);
+  text-decoration: none;
+  padding: 0.6em 0.8em;
+}
+
+@media (min-width: 728px) {
+  .nav-wrapper {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 1320px) {
+  article > figure, .nav-wrapper {
+    max-width: 1192px;
+  }
+
+  header h1 a {
+    padding: 0.6em 0;
+  }
+}
+
+footer {
+  margin: 3em 0;
+}
+
+footer p {
+  font-family: "Lato", sans-serif;
+  text-align: center;
+  font-size: 0.9em;
+  letter-spacing: 0.05em;
+  margin: 0.2em 1em;
+}
+
+footer p, footer a {
+  color: #999;
+}
+
+#ballot-visualisation {
+  font-family: "Lato", sans-serif;
+}
+
+#ballot-visualisation > h2, #ballot-visualisation-inner > div > h3, #ballot-visualisation > p {
+  text-align: center;
+}
+
+#ballot-visualisation-inner {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-end;
+}
+
+#ballot-visualisation-inner > div > ul {
+  font-size: 0.5em;
+  text-align: center;
+}
+
+#ballot-visualisation-inner > div > ul > li {
+  list-style: none;
+  margin: 0;
+}
+
+#ballot-visualisation-inner > div > ul > li > p {
+  display: inline;
+  padding-right: 0.2em;
+}

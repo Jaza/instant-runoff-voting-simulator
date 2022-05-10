@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Instant-runoff voting simulator</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="stylesheet" href="/css/style.css" type="text/css" media="all">
+    <meta name="keywords" content="instant-runoff voting, preferential voting, voting, simulator">
+    <meta name="description" content="Simulation showing how instant-runoff voting (called preferential voting in Australia) works step-by-step">
+  </head>
+  <body>
+    <header>
+      <div class="nav-wrapper">
+        <div class="site-name-wrapper">
+          <h1><a href="/">Instant-runoff voting simulator</a></h1>
+        </div>
+      </div>
+    </header>
+    <main>
+      <article>
+        <p>
+          <figure>
+            <img alt="Vote counting" loading="lazy" decoding="async" src="/img/vote-counting.jpg" width="1192" height="340">
+          </figure>
+        </p>
+        <div id="ballot-visualisation"></div>
+        <p style="margin-bottom: 0">
+          <label for="ballot-file">Ballot file CSV</label>
+        </p>
+        <p style="margin-top: 0">
+          <input type="file" id="ballot-file" accept="text/csv">
+        </p>
+      </article>
+    </main>
+    <footer>
+      <p>Copyleft 2022 <a href="https://greenash.net.au/">Jeremy Epstein</a>.</p>
+      <p>Use in accordance with <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+      <p>Header image: <a href="https://commons.wikimedia.org/wiki/File:AEC-HoR-counting-1.jpg">AEC HoR counting</a>, from Wikimedia Commons. <a href="https://pixabay.com/vectors/check-mark-check-box-green-mark-303498/">Icon from pixabay</a>.</p>
+    </footer>
+    <script src="/js/ready.js" defer></script>
+    <script src="/js/papaparse.min.js" defer></script>
+    <script src="/js/instantrunoffvoting.js" defer></script>
+  </body>
+</html>
