@@ -14,6 +14,14 @@ ready(() => {
 
   const ballotDataStore = {};
 
+  let rand = null;
+
+  // Thanks to: https://stackoverflow.com/a/9071606
+  const randomChoice = choices => {
+    const index = Math.floor(rand() * choices.length);
+    return choices[index];
+  }
+
   const getAnimationSpeed = () => {
     return ANIMATION_SPEED;
   };
@@ -134,6 +142,10 @@ ready(() => {
   };
 
   const resetBallots = () => {
+    // Generate consistent random numbers given a set of hard-coded seed values.
+    // So we can make "random" tie-breaking deterministic.
+    rand = sfc32(4195720843, 3702749721, 4070552961, 2242128807);
+
     resetBallotData();
     resetBallotVisualisation();
   };
@@ -309,6 +321,29 @@ ready(() => {
     return losingCandidates;
   };
 
+  const findCandidatesWithFewestBallotsPreviousRound = names => {
+    const store = getBallotDataStore();
+    let fewestBallotsCount = 0;
+
+    for (const name of names) {
+      const ballotsCount = store.previousRoundTotalsByCandidate[name];
+      if (!fewestBallotsCount || ballotsCount < fewestBallotsCount) {
+        fewestBallotsCount = ballotsCount;
+      }
+    }
+
+    const losingCandidates = [];
+
+    for (const name of names) {
+      const ballotsCount = store.previousRoundTotalsByCandidate[name];
+      if (ballotsCount === fewestBallotsCount) {
+        losingCandidates.push(name);
+      }
+    }
+
+    return losingCandidates;
+  };
+
   const findCandidateToEliminate = () => {
     const candidatesWithFewestBallotsThisRound = findCandidatesWithFewestBallotsThisRound();
 
@@ -316,7 +351,14 @@ ready(() => {
       return candidatesWithFewestBallotsThisRound[0];
     }
 
-    throw new Error('TODO: resolve tied losing candidates');
+    const candidatesWithFewestBallotsPreviousRound =
+      findCandidatesWithFewestBallotsPreviousRound(candidatesWithFewestBallotsThisRound);
+
+    if (candidatesWithFewestBallotsPreviousRound.length === 1) {
+      return candidatesWithFewestBallotsPreviousRound[0];
+    }
+
+    return randomChoice(candidatesWithFewestBallotsPreviousRound);
   };
 
   const findWinningCandidate = () => {
@@ -340,6 +382,15 @@ ready(() => {
     }
 
     return winners[0];
+  };
+
+  const savePreviousRoundTotalsForCandidates = () => {
+    const store = getBallotDataStore();
+
+    for (const name in store.ballotsDistributedByCandidate) {
+      store.previousRoundTotalsByCandidate[name] =
+        Object.keys(store.ballotsDistributedByCandidate[name]).length;
+    }
   };
 
   const distributeBallotInData = (id, sourceBallots, vote) => {
@@ -417,6 +468,7 @@ ready(() => {
         declareWinner(winner);
       }
       else {
+        savePreviousRoundTotalsForCandidates();
         incrementRoundNumber();
       }
     }

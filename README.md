@@ -10,4 +10,4 @@ The live site is deployed on [GitHub Pages](https://pages.github.com/).
 
 ## Previewing locally
 
-Just open `site/index.html`. That's it!
+Just open `docs/index.html`. That's it!
