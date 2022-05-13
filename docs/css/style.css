@@ -211,3 +211,24 @@ footer p, footer a {
   display: inline;
   padding-right: 0.2em;
 }
+
+.to-be-removed {
+  text-decoration: line-through;
+  color: sienna;
+}
+
+.winner {
+  color: darkgreen;
+}
+
+.winner > h3:before, .winner > h3:after {
+  content: "✭";
+}
+
+.winner > h3:before {
+  margin-right: 0.3em;
+}
+
+.winner > h3:after {
+  margin-left: 0.3em;
+}

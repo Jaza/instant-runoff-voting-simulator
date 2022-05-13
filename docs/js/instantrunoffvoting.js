@@ -102,6 +102,7 @@ ready(() => {
   };
 
   const addWinnerToVisualisation = winner => {
+    document.getElementById(winner.toLowerCase()).classList.add('winner');
     getBallotVisualisationElement().appendChild(createWinnerElement(winner));
   };
 
@@ -223,6 +224,18 @@ ready(() => {
 
   const removeUndistributedFromVisualisation = () => {
     getBallotsUndistributedElement().remove();
+  };
+
+  const markForRemoval = markedEl => {
+    markedEl.classList.add('to-be-removed');
+  };
+
+  const markCandidateForRemoval = name => {
+    markForRemoval(document.getElementById(name.toLowerCase()));
+  };
+
+  const markUndistributedForRemoval = name => {
+    markForRemoval(getBallotsUndistributedElement());
   };
 
   // Declare one candidate as the winner of the election
@@ -492,6 +505,54 @@ ready(() => {
     distributeBallotInVisualisation(id, vote);
   };
 
+  // Perform various actions at the end of a distribution round
+  const finaliseRound = sourceName => {
+    // Remove whichever ballot pile is now empty (because all its ballots got
+    // distributed out of it and into the other piles), either the pile belonging this
+    // round's losing candidate, or the "Undistributed" pile if this is the first round
+    if (sourceName != null) {
+      removeCandidate(sourceName);
+    }
+    else {
+      removeUndistributedFromVisualisation();
+    }
+
+    const winners = findWinningCandidates();
+
+    // No more rounds, we have a winner
+    if (winners.length === 1) {
+      declareWinner(winners[0]);
+      return;
+    }
+
+    // No more rounds, this is an undecided election due to tied winners
+    if (winners.length > 1) {
+      declareUndecidedElection(winners);
+      return;
+    }
+
+    // No winner yet, so indicate that we're ready to proceed to the next round
+    saveRoundTotalsForCandidates();
+    incrementRoundNumber();
+  };
+
+  // Mark a candidate or "Undistributed" for removal, then finalise the round
+  const markSourceForRemovalThenFinaliseRound = sourceName => {
+    if (sourceName != null) {
+      markCandidateForRemoval(sourceName);
+    }
+    else {
+      markUndistributedForRemoval();
+    }
+
+    setTimeout(
+      () => {
+        finaliseRound(sourceName);
+      },
+      getAnimationSpeed() * 20
+    );
+  };
+
   // Distribute one ballot, and recursively trigger distributing the next ballot
   const distributeNextBallotForRound = (roundIndex, id, sourceName, sourceBallots) => {
     distributeBallot(id, sourceName, sourceBallots);
@@ -504,31 +565,10 @@ ready(() => {
         },
         getAnimationSpeed()
       );
-
-      return;
-    }
-
-    if (sourceName != null) {
-      removeCandidate(sourceName);
     }
     else {
-      removeUndistributedFromVisualisation();
+      markSourceForRemovalThenFinaliseRound(sourceName);
     }
-
-    const winners = findWinningCandidates();
-
-    if (winners.length === 1) {
-      declareWinner(winners[0]);
-      return;
-    }
-
-    if (winners.length > 1) {
-      declareUndecidedElection(winners);
-      return;
-    }
-
-    saveRoundTotalsForCandidates();
-    incrementRoundNumber();
   };
 
   // Distribute all ballots for this round to remaining candidates
