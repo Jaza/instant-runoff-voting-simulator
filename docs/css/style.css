@@ -108,11 +108,11 @@ header {
   position: relative;
 }
 
-article > p, article > ul, article > ol, article > dl {
+article > p, article > ul, article > ol, article > dl, article > h2 {
   max-width: 680px;
 }
 
-.nav-wrapper, article > p, article > figure, article > ul, article > ol, article > dl {
+.nav-wrapper, article > p, article > figure, article > ul, article > ol, article > dl, article > h2 {
   margin-left: auto;
   margin-right: auto;
 }

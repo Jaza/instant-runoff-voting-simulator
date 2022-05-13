@@ -12,6 +12,8 @@ ready(() => {
   const WINNER_TEXT = `${WINNER_PLACEHOLDER_TEXT} is the winner!`;
   const UNDECIDED_ELECTION_PLACEHOLDER_TEXT = 'TIEDCANDIDATENAMES';
   const UNDECIDED_ELECTION_NOTICE_TEXT = `Undecided election due to tie between: ${UNDECIDED_ELECTION_PLACEHOLDER_TEXT}`;
+  const CANDIDATE_NAME_PLACEHOLDER_TEXT = 'CANDIDATENAME';
+  const BALLOTS_FOR_CANDIDATE_ELEMENT_ID_TPL = `ballots-for-${CANDIDATE_NAME_PLACEHOLDER_TEXT}`;
   const ANIMATION_SPEED = 50;
 
   const ballotDataStore = {};
@@ -32,6 +34,12 @@ ready(() => {
     return ballotDataStore;
   };
 
+  const getBallotsForCandidateElementId = name => {
+    return BALLOTS_FOR_CANDIDATE_ELEMENT_ID_TPL.replace(
+      CANDIDATE_NAME_PLACEHOLDER_TEXT, name.toLowerCase()
+    );
+  };
+
   const getBallotVisualisationElement = () => {
     return document.getElementById(BALLOT_VISUALISATION_ELEMENT_ID);
   };
@@ -41,7 +49,7 @@ ready(() => {
   };
 
   const getBallotsUndistributedElement = () => {
-    return document.getElementById(BALLOTS_UNDISTRIBUTED_LABEL.toLowerCase());
+    return document.getElementById(getBallotsForCandidateElementId(BALLOTS_UNDISTRIBUTED_LABEL));
   };
 
   const createBallotElement = (id, ballot) => {
@@ -64,7 +72,7 @@ ready(() => {
 
   const createBallotsElement = name => {
     const ballotsEl = document.createElement('div');
-    ballotsEl.id = name.toLowerCase();
+    ballotsEl.id = getBallotsForCandidateElementId(name);
     const ballotsListEl = document.createElement('ul');
     ballotsEl.appendChild(ballotsListEl);
     labelEl = document.createElement('h3');
@@ -102,7 +110,7 @@ ready(() => {
   };
 
   const addWinnerToVisualisation = winner => {
-    document.getElementById(winner.toLowerCase()).classList.add('winner');
+    document.getElementById(getBallotsForCandidateElementId(winner)).classList.add('winner');
     getBallotVisualisationElement().appendChild(createWinnerElement(winner));
   };
 
@@ -213,7 +221,7 @@ ready(() => {
   };
 
   const removeCandidateFromVisualisation = name => {
-    document.getElementById(name.toLowerCase()).remove();
+    document.getElementById(getBallotsForCandidateElementId(name)).remove();
   };
 
   // Remove the candidate who was determined to be the loser for the round
@@ -231,7 +239,7 @@ ready(() => {
   };
 
   const markCandidateForRemoval = name => {
-    markForRemoval(document.getElementById(name.toLowerCase()));
+    markForRemoval(document.getElementById(getBallotsForCandidateElementId(name)));
   };
 
   const markUndistributedForRemoval = name => {
@@ -403,7 +411,7 @@ ready(() => {
 
     // Note: if this is the final round, then we should have already (in
     // findWinningCandidates) thrown our hands up in the air and declared that "the
-    // election cannot be decided", per Australia's Electoral Act 1918 (Cth) s274(9A),
+    // election cannot be decided", per Australia's Electoral Act 1918 (Cth) s274(9C),
     // so the below tie-breaking strategies are only used when it's NOT the final round
     const candidatesWithFewestBallotsPreviousRound =
       findCandidatesWithFewestBallotsPreviousRound(candidatesWithFewestBallotsThisRound);
@@ -469,7 +477,7 @@ ready(() => {
 
   const distributeBallotInVisualisation = (id, vote) => {
     const ballotEl = document.getElementById(id);
-    const ballotsEl = document.getElementById(vote.toLowerCase());
+    const ballotsEl = document.getElementById(getBallotsForCandidateElementId(vote));
     ballotsEl.querySelector('ul').appendChild(ballotEl);
   };
 
