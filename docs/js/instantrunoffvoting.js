@@ -10,6 +10,8 @@ ready(() => {
   const EXECUTE_NEXT_ROUND_BUTTON_LABEL = `Run round ${ROUND_NUMBER_PLACEHOLDER_TEXT}`;
   const WINNER_PLACEHOLDER_TEXT = 'WINNERNAME';
   const WINNER_TEXT = `${WINNER_PLACEHOLDER_TEXT} is the winner!`;
+  const UNDECIDED_ELECTION_PLACEHOLDER_TEXT = 'TIEDCANDIDATENAMES';
+  const UNDECIDED_ELECTION_NOTICE_TEXT = `Undecided election due to tie between: ${UNDECIDED_ELECTION_PLACEHOLDER_TEXT}`;
   const ANIMATION_SPEED = 50;
 
   const ballotDataStore = {};
@@ -103,20 +105,34 @@ ready(() => {
     getBallotVisualisationElement().appendChild(createWinnerElement(winner));
   };
 
+  const createUndecidedElectionNoticeElement = winners => {
+    const noticeEl = document.createElement('p');
+    noticeEl.textContent = UNDECIDED_ELECTION_NOTICE_TEXT.replace(
+      UNDECIDED_ELECTION_PLACEHOLDER_TEXT, winners.join(', ')
+    );
+    return noticeEl;
+  };
+
+  const addUndecidedElectionNoticeToVisualisation = winners => {
+    getBallotVisualisationElement().appendChild(createUndecidedElectionNoticeElement(winners));
+  };
+
   const resetBallotData = () => {
     const store = getBallotDataStore();
     store.ballotsUndistributed = {};
     store.previousRoundTotalsByCandidate = {};
+    store.currentRoundTotalsByCandidate = {};
     store.ballotsDistributedByCandidate = {};
     store.currentRoundIndex = 0;
     store.numBallots = 0;
   };
 
-  const initialisePreviousRoundTotalsForCandidates = () => {
+  const initialiseRoundTotalsForCandidates = () => {
     const store = getBallotDataStore();
 
     for (const name in store.ballotsDistributedByCandidate) {
       store.previousRoundTotalsByCandidate[name] = 0;
+      store.currentRoundTotalsByCandidate[name] = 0;
     }
   };
 
@@ -163,6 +179,7 @@ ready(() => {
     );
   };
 
+  // Begin the next round of ballot distribution
   const incrementRoundNumber = () => {
     const roundIndex = incrementRoundNumberInData();
     incrementRoundNumberInVisualisation(roundIndex);
@@ -180,6 +197,7 @@ ready(() => {
     );
   };
 
+  // Update the total number of ballots (i.e. the number of ballots in the input CSV)
   const updateNumBallots = (numBallots) => {
     updateNumBallotsInData(numBallots);
     updateNumBallotsInVisualisation(numBallots);
@@ -190,12 +208,14 @@ ready(() => {
 
     delete store.ballotsDistributedByCandidate[name];
     delete store.previousRoundTotalsByCandidate[name];
+    delete store.currentRoundTotalsByCandidate[name];
   };
 
   const removeCandidateFromVisualisation = name => {
     document.getElementById(name.toLowerCase()).remove();
   };
 
+  // Remove the candidate who was determined to be the loser for the round
   const removeCandidate = name => {
     removeCandidateFromData(name);
     removeCandidateFromVisualisation(name);
@@ -205,9 +225,16 @@ ready(() => {
     getBallotsUndistributedElement().remove();
   };
 
+  // Declare one candidate as the winner of the election
   const declareWinner = winner => {
     removeContinueButtonFromVisualisation();
     addWinnerToVisualisation(winner);
+  };
+
+  // Declare that the election cannot be decided due to tied winners
+  const declareUndecidedElection = winners => {
+    removeContinueButtonFromVisualisation();
+    addUndecidedElectionNoticeToVisualisation(winners);
   };
 
   const appendCandidateFromBallotToData = name => {
@@ -222,11 +249,13 @@ ready(() => {
     container.appendChild(candidateEl);
   };
 
+  // Add a candidate into the simulation
   const appendCandidateFromBallot = name => {
     appendCandidateFromBallotToData(name);
     appendCandidateFromBallotToVisualisation(name);
   };
 
+  // Add all candidates on the specified ballot into the simulation
   const appendCandidatesFromBallot = (id, ballot) => {
     const store = getBallotDataStore();
 
@@ -248,6 +277,7 @@ ready(() => {
     undistributedEl.querySelector('ul').prepend(createBallotElement(id, ballot));
   };
 
+  // Add the "Undistributed" ballot pile into the simulation
   const appendBallotUndistributed = (id, ballot) => {
     appendCandidatesFromBallot(id, ballot);
     const numBallots = appendBallotUndistributedData(id, ballot);
@@ -256,6 +286,7 @@ ready(() => {
     updateNumBallots(numBallots);
   };
 
+  // Load one ballot into the simulation, and recursively trigger loading the next one
   const loadNextBallotFromfile = (result, results) => {
     const id = crypto.randomUUID();
     const ballot = {
@@ -275,12 +306,13 @@ ready(() => {
       );
     }
     else {
-      initialisePreviousRoundTotalsForCandidates();
+      initialiseRoundTotalsForCandidates();
       appendContinueButtonToVisualisation();
     }
   };
 
-  const loadBallotsFromFile = (file) => {
+  // Load all ballots into the simulation
+  const loadBallotsFromFile = file => {
     Papa.parse(
       file,
       {
@@ -298,6 +330,7 @@ ready(() => {
     );
   };
 
+  // Find the candidates that are the clear losers for this round
   const findCandidatesWithFewestBallotsThisRound = () => {
     const store = getBallotDataStore();
     let fewestBallotsCount = 0;
@@ -321,6 +354,7 @@ ready(() => {
     return losingCandidates;
   };
 
+  // Find the losing candidates based on results of the previous round
   const findCandidatesWithFewestBallotsPreviousRound = names => {
     const store = getBallotDataStore();
     let fewestBallotsCount = 0;
@@ -344,26 +378,45 @@ ready(() => {
     return losingCandidates;
   };
 
+  // Find the losing candidate to eliminate this round, using various strategies
   const findCandidateToEliminate = () => {
+    const store = getBallotDataStore();
     const candidatesWithFewestBallotsThisRound = findCandidatesWithFewestBallotsThisRound();
 
+    // If there's a single clear loser from the current round, great, eliminate that guy
     if (candidatesWithFewestBallotsThisRound.length === 1) {
       return candidatesWithFewestBallotsThisRound[0];
     }
 
+    // Note: if this is the final round, then we should have already (in
+    // findWinningCandidates) thrown our hands up in the air and declared that "the
+    // election cannot be decided", per Australia's Electoral Act 1918 (Cth) s274(9A),
+    // so the below tie-breaking strategies are only used when it's NOT the final round
     const candidatesWithFewestBallotsPreviousRound =
       findCandidatesWithFewestBallotsPreviousRound(candidatesWithFewestBallotsThisRound);
 
+    // If there are multiple losers from the current round, but of those, there's a
+    // single candidate who had the fewest ballots in the previous round, then eliminate
+    // that guy, per Australia's Electoral Act 1918 (Cth) s274(9)
     if (candidatesWithFewestBallotsPreviousRound.length === 1) {
       return candidatesWithFewestBallotsPreviousRound[0];
     }
 
+    // If, of the multiple losers from the current round, two or more of them are tied
+    // with having had the fewest ballots in the previous round (or if this was the
+    // first round), i.e. if there's an unbreakable tie, then "decide by lot" (i.e. pick
+    // a loser randomly), per Australia's Electoral Act 1918 (Cth) s274(9)
+    // Note: in the interest of making this simulator deterministic (i.e. of making it
+    // always produce the same result, given an input set of ballots), we initialise the
+    // random number generator with a hard-coded seed value, so that it always generates
+    // the same sequence of "random" numbers
     return randomChoice(candidatesWithFewestBallotsPreviousRound);
   };
 
-  const findWinningCandidate = () => {
+  // Find the candidate(s) who has at least 50% of the ballots distributed to them
+  const findWinningCandidates = () => {
     const store = getBallotDataStore();
-    const winners = []
+    const winners = [];
 
     for (const name in store.ballotsDistributedByCandidate) {
       const numBallotsForCandidate = Object.keys(store.ballotsDistributedByCandidate[name]).length;
@@ -373,22 +426,18 @@ ready(() => {
       }
     }
 
-    if (winners.length > 1) {
-      throw new Error('Only one may emerge victorious');
-    }
-
-    if (!winners.length) {
-      return null;
-    }
-
-    return winners[0];
+    return winners;
   };
 
-  const savePreviousRoundTotalsForCandidates = () => {
+  const saveRoundTotalsForCandidates = () => {
     const store = getBallotDataStore();
 
     for (const name in store.ballotsDistributedByCandidate) {
-      store.previousRoundTotalsByCandidate[name] =
+      if (store.currentRoundTotalsByCandidate[name] !== 0) {
+        store.previousRoundTotalsByCandidate[name] = store.currentRoundTotalsByCandidate[name];
+      }
+
+      store.currentRoundTotalsByCandidate[name] =
         Object.keys(store.ballotsDistributedByCandidate[name]).length;
     }
   };
@@ -411,6 +460,7 @@ ready(() => {
     ballotsEl.querySelector('ul').appendChild(ballotEl);
   };
 
+  // Move a ballot from its current candidate to whomever is the next preference
   const distributeBallot = (id, sourceName, sourceBallots) => {
     const store = getBallotDataStore();
 
@@ -442,6 +492,7 @@ ready(() => {
     distributeBallotInVisualisation(id, vote);
   };
 
+  // Distribute one ballot, and recursively trigger distributing the next ballot
   const distributeNextBallotForRound = (roundIndex, id, sourceName, sourceBallots) => {
     distributeBallot(id, sourceName, sourceBallots);
 
@@ -453,27 +504,34 @@ ready(() => {
         },
         getAnimationSpeed()
       );
+
+      return;
+    }
+
+    if (sourceName != null) {
+      removeCandidate(sourceName);
     }
     else {
-      if (sourceName != null) {
-        removeCandidate(sourceName);
-      }
-      else {
-        removeUndistributedFromVisualisation();
-      }
-
-      const winner = findWinningCandidate();
-
-      if (winner != null) {
-        declareWinner(winner);
-      }
-      else {
-        savePreviousRoundTotalsForCandidates();
-        incrementRoundNumber();
-      }
+      removeUndistributedFromVisualisation();
     }
+
+    const winners = findWinningCandidates();
+
+    if (winners.length === 1) {
+      declareWinner(winners[0]);
+      return;
+    }
+
+    if (winners.length > 1) {
+      declareUndecidedElection(winners);
+      return;
+    }
+
+    saveRoundTotalsForCandidates();
+    incrementRoundNumber();
   };
 
+  // Distribute all ballots for this round to remaining candidates
   const distributeBallotsForRound = roundIndex => {
     const store = getBallotDataStore();
     const sourceName = !!roundIndex ? findCandidateToEliminate() : null;
