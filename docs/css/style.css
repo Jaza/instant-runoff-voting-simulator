@@ -183,6 +183,21 @@ footer p, footer a {
   color: #999;
 }
 
+button {
+  padding: 0.8em 1em 0.9em;
+  font-family: "Lato", sans-serif;
+  text-align: center;
+  border: 0;
+  font-size: 1em;
+  margin-bottom: 1em;
+  background: rgba(128, 128, 128, .1);
+}
+
+button:hover {
+  cursor: pointer;
+  background: rgba(0, 102, 0, .1);
+}
+
 #ballot-visualisation {
   font-family: "Lato", sans-serif;
 }
@@ -198,7 +213,7 @@ footer p, footer a {
 }
 
 #ballot-visualisation-inner > div > ul {
-  font-size: 0.5em;
+  font-size: 0.6em;
   text-align: center;
 }
 
@@ -209,7 +224,7 @@ footer p, footer a {
 
 #ballot-visualisation-inner > div > ul > li > p {
   display: inline;
-  padding-right: 0.2em;
+  padding: 0.1em;
 }
 
 .to-be-removed {
@@ -218,7 +233,7 @@ footer p, footer a {
 }
 
 .winner {
-  color: darkgreen;
+  color: limegreen;
 }
 
 .winner > h3:before, .winner > h3:after {
@@ -231,4 +246,12 @@ footer p, footer a {
 
 .winner > h3:after {
   margin-left: 0.3em;
+}
+
+.active-vote {
+  background-color: palegreen;
+}
+
+.previously-active-vote {
+  background-color: lightblue;
 }

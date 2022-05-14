@@ -14,6 +14,7 @@ ready(() => {
   const UNDECIDED_ELECTION_NOTICE_TEXT = `Undecided election due to tie between: ${UNDECIDED_ELECTION_PLACEHOLDER_TEXT}`;
   const CANDIDATE_NAME_PLACEHOLDER_TEXT = 'CANDIDATENAME';
   const BALLOTS_FOR_CANDIDATE_ELEMENT_ID_TPL = `ballots-for-${CANDIDATE_NAME_PLACEHOLDER_TEXT}`;
+  const VOTE_FOR_CANDIDATE_CLASS_NAME_TPL = `vote-for-${CANDIDATE_NAME_PLACEHOLDER_TEXT}`;
   const ANIMATION_SPEED = 50;
 
   const ballotDataStore = {};
@@ -40,6 +41,12 @@ ready(() => {
     );
   };
 
+  const getVoteForCandidateClassName = name => {
+    return VOTE_FOR_CANDIDATE_CLASS_NAME_TPL.replace(
+      CANDIDATE_NAME_PLACEHOLDER_TEXT, name.toLowerCase()
+    );
+  };
+
   const getBallotVisualisationElement = () => {
     return document.getElementById(BALLOT_VISUALISATION_ELEMENT_ID);
   };
@@ -58,6 +65,7 @@ ready(() => {
 
     for (const name in ballot) {
       const preferenceEl = document.createElement('p');
+      preferenceEl.classList.add(getVoteForCandidateClassName(name));
       const nameEl = document.createElement('span');
       nameEl.textContent = name[0];
       preferenceEl.appendChild(nameEl);
@@ -475,10 +483,21 @@ ready(() => {
     store.ballotsDistributedByCandidate[vote][id] = ballot;
   };
 
+  const markActiveVoteInBallotInVisualisation = (id, vote) => {
+    const ballotEl = document.getElementById(id);
+    ballotEl.querySelectorAll('p.active-vote').forEach(voteEl => {
+      const voteClassList = voteEl.classList;
+      voteClassList.remove('active-vote');
+      voteClassList.add('previously-active-vote');
+    });
+    ballotEl.querySelector(`.${getVoteForCandidateClassName(vote)}`).classList.add('active-vote');
+  };
+
   const distributeBallotInVisualisation = (id, vote) => {
     const ballotEl = document.getElementById(id);
     const ballotsEl = document.getElementById(getBallotsForCandidateElementId(vote));
     ballotsEl.querySelector('ul').appendChild(ballotEl);
+    markActiveVoteInBallotInVisualisation(id, vote);
   };
 
   // Move a ballot from its current candidate to whomever is the next preference
