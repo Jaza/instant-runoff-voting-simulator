@@ -112,7 +112,7 @@ article > p, article > ul, article > ol, article > dl, article > h2 {
   max-width: 680px;
 }
 
-.nav-wrapper, article > p, article > figure, article > ul, article > ol, article > dl, article > h2 {
+.nav-wrapper, article > p, article > figure, article > ul, article > ol, article > dl, article > h2, #ballot-log-wrapper {
   margin-left: auto;
   margin-right: auto;
 }
@@ -158,7 +158,7 @@ header h1 a {
 }
 
 @media (min-width: 1320px) {
-  article > figure, .nav-wrapper {
+  article > figure, .nav-wrapper, #ballot-log-wrapper {
     max-width: 1192px;
   }
 
@@ -254,4 +254,15 @@ button:hover {
 
 .previously-active-vote {
   background-color: lightblue;
+}
+
+#ballot-log {
+  background-color: gainsboro;
+  padding: 1em;
+}
+
+#ballot-log > p {
+  font-family: monospace;
+  margin: 0 0 0.2em;
+  font-size: 0.9em;
 }
