@@ -26,7 +26,12 @@ ready(() => {
   const randomChoice = choices => {
     const index = Math.floor(rand() * choices.length);
     return choices[index];
-  }
+  };
+
+  // Thanks to: https://stackoverflow.com/a/44827922
+  const areSetsEqual = (a, b) => {
+    return a.size === b.size && [...a].every(value => b.has(value));
+  };
 
   const getAnimationSpeed = () => {
     return ANIMATION_SPEED;
@@ -320,6 +325,24 @@ ready(() => {
 
   const appendBallotUndistributedData = (id, ballot) => {
     const store = getBallotDataStore();
+    const numCandidates = Object.keys(ballot).length;
+    const expectedBallotValues = new Set([...Array.from(Array(numCandidates).keys())]);
+    expectedBallotValues.delete(0);
+    expectedBallotValues.add(numCandidates);
+
+    for (const name in ballot) {
+      if (!ballot[name]) {
+        throw new Error(`No value specified for ${name} in one of the ballots`);
+      }
+    }
+
+    const ballotValues = Object.values(ballot);
+    if (!areSetsEqual(new Set(ballotValues), expectedBallotValues)) {
+      throw new Error(
+        `Invalid ballot values ${ballotValues}, expected ${Array.from(expectedBallotValues)}`
+      );
+    }
+
     store.ballotsUndistributed[id] = ballot;
     return Object.keys(store.ballotsUndistributed).length;
   };
@@ -347,7 +370,14 @@ ready(() => {
       ...result
     };
 
-    numBallots = appendBallotUndistributed(id, ballot);
+    try {
+      numBallots = appendBallotUndistributed(id, ballot);
+    }
+    catch (e) {
+      addLogMessageToVisualisation(`${e}.`);
+      addLogMessageToVisualisation(`Aborted simulation.`);
+      return;
+    }
 
     if (results.length) {
       setTimeout(
@@ -376,12 +406,16 @@ ready(() => {
         dynamicTyping: true,
         skipEmptyLines: 'greedy',
         complete: results => {
-          if (results.data.length) {
-            addLogMessageToVisualisation('Received new ballot file.');
-            const moreResults = results.data.slice();
-            const nextResult = moreResults.pop();
-            loadNextBallotFromfile(nextResult, moreResults);
+          if (!results.data.length) {
+            addLogMessageToVisualisation('Error: ballot file is empty.');
+            addLogMessageToVisualisation('Aborted simulation.');
+            return;
           }
+
+          addLogMessageToVisualisation('Received new ballot file.');
+          const moreResults = results.data.slice();
+          const nextResult = moreResults.pop();
+          loadNextBallotFromfile(nextResult, moreResults);
         }
       }
     );
@@ -504,8 +538,20 @@ ready(() => {
     for (const name in store.ballotsDistributedByCandidate) {
       const numBallotsForCandidate = Object.keys(store.ballotsDistributedByCandidate[name]).length;
 
+      // Two candidates can be tied winners on exactly 50% (although in such a case
+      // they're not actually winners, instead we declare an undecided election)
       if (numBallotsForCandidate / store.numBallots >= 1 / 2) {
         winners.push(name);
+      }
+    }
+
+    if (winners.length === 1) {
+      const numBallotsForCandidate = Object.keys(store.ballotsDistributedByCandidate[winners[0]]).length;
+
+      // In order for one candidate to be the outright winner, he/she must obtain more
+      // than 50% of the ballots, obtaining exactly 50% is not enough
+      if (!(numBallotsForCandidate / store.numBallots > 1 / 2)) {
+        return [];
       }
     }
 
@@ -669,14 +715,14 @@ ready(() => {
     const sourceBallots = sourceName != null
       ? store.ballotsDistributedByCandidate[sourceName]
       : store.ballotsUndistributed;
-    const numsourceBallots = Object.keys(sourceBallots).length;
+    const numSourceBallots = Object.keys(sourceBallots).length;
 
     addLogMessageToVisualisation(
-      `Started round ${roundIndex + 1}, distributing ${numsourceBallots} ` +
+      `Started round ${roundIndex + 1}, distributing ${numSourceBallots} ` +
       `ballots from ${sourceName ? sourceName : BALLOTS_UNDISTRIBUTED_LABEL}.`
     );
 
-    if (!numsourceBallots) {
+    if (!numSourceBallots) {
       throw new Error('No source ballots found, unable to distribute ballots');
     }
 
