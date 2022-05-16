@@ -206,10 +206,16 @@ button:hover {
   text-align: center;
 }
 
-#ballot-visualisation-inner {
+#ballot-visualisation-inner, .wideflex-buttons {
   display: flex;
   justify-content: space-evenly;
   align-items: flex-end;
+  gap: 1em;
+  flex-wrap: wrap;
+}
+
+.wideflex-buttons > p {
+  margin: 0;
 }
 
 #ballot-visualisation-inner > div > ul {

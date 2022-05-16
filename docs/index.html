@@ -19,20 +19,56 @@
     </header>
     <main>
       <article>
+        <div id="ballot-visualisation"></div>
+        <h2>Ballot file CSV</h2>
+        <p style="margin-bottom: 0">
+          <label for="ballot-file">Upload a file</label>
+        </p>
+        <p style="margin-top: 0">
+          <input type="file" id="ballot-file" accept="text/csv">
+        </p>
+        <blockquote>or</blockquote>
+        <p>Choose one of these:</p>
+        <section class="wideflex-buttons" id="choose-csv-url">
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/empty_ballots.csv">empty_ballots.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/five_rounds.csv">five_rounds.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/invalid_ballot_value.csv">invalid_ballot_value.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/missing_ballot_value.csv">missing_ballot_value.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/tied_final_round.csv">tied_final_round.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/tied_first_round.csv">tied_first_round.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/tied_second_round.csv">tied_second_round.csv</button>
+          </p>
+          <p>
+            <button data-csv-url="https://raw.githubusercontent.com/Jaza/instant-runoff-voting-simulator/master/sampleballots/winner_first_round.csv">winner_first_round.csv</button>
+          </p>
+        </section>
+        <h2>About</h2>
         <p>
           <figure>
             <img alt="Vote counting" loading="lazy" decoding="async" src="./img/vote-counting.jpg" width="1192" height="340">
           </figure>
         </p>
-        <div id="ballot-visualisation"></div>
-        <p style="margin-bottom: 0">
-          <label for="ballot-file">Ballot file CSV</label>
-        </p>
-        <p style="margin-top: 0">
-          <input type="file" id="ballot-file" accept="text/csv">
-        </p>
-        <h2>About</h2>
-        <p>This simulator visualises how the counting process works for <a href="https://en.wikipedia.org/wiki/Instant-runoff_voting">Instant-runoff voting</a>, as it's used <a href="https://www.aec.gov.au/Voting/counting/hor_count.htm">for the House of Representatives</a> in <a href="https://peo.gov.au/understand-our-parliament/having-your-say/elections-and-voting/federal-elections/">Australian federal elections</a>. It implements the rules as specified in the <a href="https://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/cea1918233/s274.html">Electoral Act 1918 (Cth) s274</a>.</p>
+        <p>This simulator visualises how the counting process works step-by-step, for <a href="https://en.wikipedia.org/wiki/Instant-runoff_voting">Instant-runoff voting</a> (called preferential voting in Australia), as it's used <a href="https://www.aec.gov.au/Voting/counting/hor_count.htm">for the House of Representatives</a> in <a href="https://peo.gov.au/understand-our-parliament/having-your-say/elections-and-voting/federal-elections/">Australian federal elections</a>. It implements the rules as specified in the <a href="https://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/cea1918233/s274.html">Electoral Act 1918 (Cth) s274</a>.</p>
+        <p>To start a new simulation, upload a ballot CSV file. The file must contain a header row with the names of the candidates, and then a row representing each ballot, with a given ballot containing votes from 1 to x (where x is the number of candidates) for all candidates.</p>
+        <p>Alternatively, click on a "Choose one of these:" button to begin a simulation using one of the built-in sample ballot files.</p>
+        <p>All ballots start in the "Undistributed" pile. Once the ballots are loaded, the "Run round 1" button will appear. Click that button to run the first round of ballot distribution.</p>
+        <p>If there's a winner after distributing ballots for a given round, then a winner is declared and the simulation ends. Otherwise, click "Run round x" to eliminate the loser for the current round, and to distribute ballots for the next round. This continues until a single candidate's pile contains more than half of all the ballots.</p>
+        <p>To run the simulation again, upload or choose another ballot file.</p>
+        <p>There are <a href="https://petertheone.github.io/IRV/">other tools around</a> that do basically <a href="https://condorcet.ericgorr.net/">the same thing</a> as this simulator. Kudos to the authors of those tools. However, they only output a text log or a text-based table, they don't provide any visualisation or animation of the vote-counting process. And they spit out the results for all rounds all at once, they don't show (quite as clearly) how the results evolve from one round to the next.</p>
+        <p>I hope that, by being interactive and prompting the user to run each round one-by-one, and by visualising the ballot distribution between rounds with some basic animation, this simulation gives you a deeper understanding of how instant-runoff voting works.</p>
       </article>
     </main>
     <footer>

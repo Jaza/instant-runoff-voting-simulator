@@ -397,30 +397,6 @@ ready(() => {
     }
   };
 
-  // Load all ballots into the simulation
-  const loadBallotsFromFile = file => {
-    Papa.parse(
-      file,
-      {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: 'greedy',
-        complete: results => {
-          if (!results.data.length) {
-            addLogMessageToVisualisation('Error: ballot file is empty.');
-            addLogMessageToVisualisation('Aborted simulation.');
-            return;
-          }
-
-          addLogMessageToVisualisation('Received new ballot file.');
-          const moreResults = results.data.slice();
-          const nextResult = moreResults.pop();
-          loadNextBallotFromfile(nextResult, moreResults);
-        }
-      }
-    );
-  };
-
   // Find the candidates that are the clear losers for this round
   const findCandidatesWithFewestBallotsThisRound = () => {
     const store = getBallotDataStore();
@@ -731,6 +707,45 @@ ready(() => {
     distributeNextBallotForRound(roundIndex, nextId, sourceName, sourceBallots);
   };
 
+  // Load all ballots into the simulation
+  const loadBallotResults = results => {
+    if (!results.data.length) {
+      addLogMessageToVisualisation('Error: ballot file is empty.');
+      addLogMessageToVisualisation('Aborted simulation.');
+      return;
+    }
+
+    addLogMessageToVisualisation('Received new ballot file.');
+    const moreResults = results.data.slice();
+    const nextResult = moreResults.pop();
+    loadNextBallotFromfile(nextResult, moreResults);
+  }
+
+  const loadBallotsFromFile = file => {
+    Papa.parse(
+      file,
+      {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: 'greedy',
+        complete: loadBallotResults
+      }
+    );
+  };
+
+  const loadBallotsFromUrl = url => {
+    Papa.parse(
+      url,
+      {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: 'greedy',
+        complete: loadBallotResults
+      }
+    );
+  };
+
   const continueButtonListener = e => {
     const store = getBallotDataStore();
     distributeBallotsForRound(store.currentRoundIndex);
@@ -747,9 +762,24 @@ ready(() => {
     loadBallotsFromFile(fileList[0]);
   };
 
+  const ballotChooseUrlListener = e => {
+    const url = e.target.dataset.csvUrl;
+
+    if (!url) {
+      return;
+    }
+
+    resetBallots();
+    loadBallotsFromUrl(url);
+  };
+
   const init = () => {
     const fileSelector = document.getElementById(BALLOT_FILE_ELEMENT_ID);
     fileSelector.addEventListener('change', ballotFileListener);
+
+    document.querySelectorAll('#choose-csv-url > p > button').forEach(chooseCsvEl => {
+      chooseCsvEl.addEventListener('click', ballotChooseUrlListener);
+    });
   };
 
   init();
