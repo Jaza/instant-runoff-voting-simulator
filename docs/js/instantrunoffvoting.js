@@ -397,6 +397,20 @@ ready(() => {
     }
   };
 
+  // Find candidates that have no votes right now
+  const findCandidatesWithNoVotes = () => {
+    const store = getBallotDataStore();
+    const namesWithNoVote = [];
+
+    for (const name in store.ballotsDistributedByCandidate) {
+      if (!Object.keys(store.ballotsDistributedByCandidate[name]).length) {
+        namesWithNoVote.push(name);
+      }
+    }
+
+    return namesWithNoVote;
+  };
+
   // Find the candidates that are the clear losers for this round
   const findCandidatesWithFewestBallotsThisRound = () => {
     const store = getBallotDataStore();
@@ -622,6 +636,13 @@ ready(() => {
     }
     else {
       removeUndistributedFromVisualisation();
+
+      namesWithNoVotes = findCandidatesWithNoVotes();
+      if (namesWithNoVotes.length) {
+        for (const name of namesWithNoVotes) {
+          removeCandidate(name);
+        }
+      }
     }
 
     addLogMessageToVisualisation(
@@ -654,6 +675,14 @@ ready(() => {
     }
     else {
       markUndistributedForRemoval();
+
+      namesWithNoVotes = findCandidatesWithNoVotes();
+      if (namesWithNoVotes.length) {
+        for (const name of namesWithNoVotes) {
+          addLogMessageToVisualisation(`${name} has no "Vote 1"'s, eliminating him/her.`);
+          markCandidateForRemoval(name);
+        }
+      }
     }
 
     addLogMessageToVisualisation('Distributed all ballots for this round.');
